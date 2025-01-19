@@ -1,31 +1,31 @@
-import React from 'react';
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
+import React from "react";
+import classNames from "classnames";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import {
   getLocale,
   FormattedMessage,
   injectIntl,
   intlShape,
-} from '@edx/frontend-platform/i18n';
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+} from "@edx/frontend-platform/i18n";
+import { sendTrackEvent } from "@edx/frontend-platform/analytics";
 
-import messages from './Checkout.messages';
+import messages from "./Checkout.messages";
 import {
   basketSelector,
   paymentSelector,
   updateClientSecretSelector,
-} from '../data/selectors';
-import { fetchClientSecret, submitPayment } from '../data/actions';
-import AcceptedCardLogos from './assets/accepted-card-logos.png';
+} from "../data/selectors";
+import { fetchClientSecret, submitPayment } from "../data/actions";
+import AcceptedCardLogos from "./assets/accepted-card-logos.png";
 
-import PaymentForm from './payment-form/PaymentForm';
-import StripePaymentForm from './payment-form/StripePaymentForm';
-import FreeCheckoutOrderButton from './FreeCheckoutOrderButton';
-import { PayPalButton } from '../payment-methods/paypal';
-import { ORDER_TYPES } from '../data/constants';
+import PaymentForm from "./payment-form/PaymentForm";
+import StripePaymentForm from "./payment-form/StripePaymentForm";
+import FreeCheckoutOrderButton from "./FreeCheckoutOrderButton";
+import { PayPalButton } from "../payment-methods/paypal";
+import { ORDER_TYPES } from "../data/constants";
 
 class Checkout extends React.Component {
   componentDidMount() {
@@ -36,17 +36,14 @@ class Checkout extends React.Component {
     // TO DO: after event parity, track data should be
     // sent only if the payment is processed, not on click
     // Check for ApplePay and Free Basket as well
-    sendTrackEvent(
-      'edx.bi.ecommerce.basket.payment_selected',
-      {
-        type: 'click',
-        category: 'checkout',
-        paymentMethod: 'PayPal',
-        stripeEnabled: this.props.enableStripePaymentProcessor,
-      },
-    );
+    sendTrackEvent("edx.bi.ecommerce.basket.payment_selected", {
+      type: "click",
+      category: "checkout",
+      paymentMethod: "PayPal",
+      stripeEnabled: this.props.enableStripePaymentProcessor,
+    });
 
-    this.props.submitPayment({ method: 'paypal' });
+    this.props.submitPayment({ method: "paypal" });
   };
 
   // eslint-disable-next-line react/no-unused-class-component-methods
@@ -54,21 +51,18 @@ class Checkout extends React.Component {
     // TO DO: after event parity, track data should be
     // sent only if the payment is processed, not on click
     // Check for PayPal and Free Basket as well
-    sendTrackEvent(
-      'edx.bi.ecommerce.basket.payment_selected',
-      {
-        type: 'click',
-        category: 'checkout',
-        paymentMethod: 'Apple Pay',
-        stripeEnabled: this.props.enableStripePaymentProcessor,
-      },
-    );
+    sendTrackEvent("edx.bi.ecommerce.basket.payment_selected", {
+      type: "click",
+      category: "checkout",
+      paymentMethod: "Apple Pay",
+      stripeEnabled: this.props.enableStripePaymentProcessor,
+    });
 
-    this.props.submitPayment({ method: 'apple-pay' });
+    this.props.submitPayment({ method: "apple-pay" });
   };
 
   handleSubmitCybersource = (formData) => {
-    this.props.submitPayment({ method: 'cybersource', ...formData });
+    this.props.submitPayment({ method: "cybersource", ...formData });
   };
 
   // The payment form does client side validation that happens before
@@ -78,41 +72,36 @@ class Checkout extends React.Component {
     // TO DO: after event parity, track data should be
     // sent only if the payment is processed, not on click
     // Check for PayPal, ApplePay and Free Basket as well
-    sendTrackEvent(
-      'edx.bi.ecommerce.basket.payment_selected',
-      {
-        type: 'click',
-        category: 'checkout',
-        paymentMethod: 'Credit Card',
-        checkoutType: 'client_side',
-        flexMicroformEnabled: true,
-        stripeEnabled: this.props.enableStripePaymentProcessor,
-      },
-    );
+    sendTrackEvent("edx.bi.ecommerce.basket.payment_selected", {
+      type: "click",
+      category: "checkout",
+      paymentMethod: "Credit Card",
+      checkoutType: "client_side",
+      flexMicroformEnabled: true,
+      stripeEnabled: this.props.enableStripePaymentProcessor,
+    });
   };
 
   handleSubmitStripe = (formData) => {
-    this.props.submitPayment({ method: 'stripe', ...formData });
+    this.props.submitPayment({ method: "stripe", ...formData });
   };
 
   handleSubmitStripeButtonClick = () => {
-    sendTrackEvent(
-      'edx.bi.ecommerce.basket.payment_selected',
-      {
-        type: 'click',
-        category: 'checkout',
-        paymentMethod: 'Credit Card - Stripe',
-        checkoutType: 'client_side',
-        stripeEnabled: this.props.enableStripePaymentProcessor,
-      },
-    );
+    sendTrackEvent("edx.bi.ecommerce.basket.payment_selected", {
+      type: "click",
+      category: "checkout",
+      paymentMethod: "Credit Card - Stripe",
+      checkoutType: "client_side",
+      stripeEnabled: this.props.enableStripePaymentProcessor,
+    });
   };
 
   handleSubmitFreeCheckout = () => {
-    sendTrackEvent(
-      'edx.bi.ecommerce.basket.free_checkout',
-      { type: 'click', category: 'checkout', stripeEnabled: this.props.enableStripePaymentProcessor },
-    );
+    sendTrackEvent("edx.bi.ecommerce.basket.free_checkout", {
+      type: "click",
+      category: "checkout",
+      stripeEnabled: this.props.enableStripePaymentProcessor,
+    });
   };
 
   renderBillingFormSkeleton() {
@@ -172,62 +161,62 @@ class Checkout extends React.Component {
         // in through the appearance object they are currently placed here.
         // TODO: Investigate if these values can be pulled into javascript from the Paragon css files
         rules: {
-          '.Input': {
-            border: 'solid 1px #707070', // $gray-500
-            borderRadius: '0',
+          ".Input": {
+            border: "solid 1px #707070", // $gray-500
+            borderRadius: "0",
           },
-          '.Input:hover': {
-            border: 'solid 1px #1f3226',
+          ".Input:hover": {
+            border: "solid 1px #1f3226",
           },
-          '.Input:focus': {
-            color: '#454545',
-            backgroundColor: '#FFFFFF', // $white
-            borderColor: '#0A3055', // $primary
-            outline: '0',
-            boxShadow: '0 0 0 1px #0A3055', // $primary
+          ".Input:focus": {
+            color: "#454545",
+            backgroundColor: "#FFFFFF", // $white
+            borderColor: "#0A3055", // $primary
+            outline: "0",
+            boxShadow: "0 0 0 1px #0A3055", // $primary
           },
-          '.Label': {
-            fontSize: '1.125rem',
-            fontFamily: 'Inter,Helvetica Neue,Arial,sans-serif',
-            fontWeight: '400',
-            marginBottom: '0.5rem',
+          ".Label": {
+            fontSize: "1.125rem",
+            fontFamily: "Inter,Helvetica Neue,Arial,sans-serif",
+            fontWeight: "400",
+            marginBottom: "0.5rem",
           },
         },
       },
       fields: {
         billingDetails: {
-          address: 'never',
+          address: "never",
         },
       },
     };
 
     // istanbul ignore next
-    const payPalIsSubmitting = submitting && paymentMethod === 'paypal';
+    const payPalIsSubmitting = submitting && paymentMethod === "paypal";
     // istanbul ignore next
-    const cybersourceIsSubmitting = submitting && paymentMethod === 'cybersource';
+    const cybersourceIsSubmitting =
+      submitting && paymentMethod === "cybersource";
     // istanbul ignore next
-    const stripeIsSubmitting = submitting && paymentMethod === 'stripe';
+    const stripeIsSubmitting = submitting && paymentMethod === "stripe";
 
     if (isFreeBasket) {
       return (
-        <FreeCheckoutOrderButton
-          onClick={this.handleSubmitFreeCheckout}
-        />
+        <FreeCheckoutOrderButton onClick={this.handleSubmitFreeCheckout} />
       );
     }
 
-    const basketClassName = 'basket-section';
+    const basketClassName = "basket-section";
 
     // TODO: Right now when fetching capture context, CyberSource's captureKey is saved as clientSecretId
     // so we cannot rely on !options.clientSecret to distinguish btw payment processors
-    const shouldDisplayStripePaymentForm = !loading && enableStripePaymentProcessor && options.clientSecret;
-    const shouldDisplayCyberSourcePaymentForm = !loading && !enableStripePaymentProcessor;
+    const shouldDisplayStripePaymentForm =
+      !loading && enableStripePaymentProcessor && options.clientSecret;
+    const shouldDisplayCyberSourcePaymentForm =
+      !loading && !enableStripePaymentProcessor;
 
     // Doing this within the Checkout component so locale is configured and available
     let stripePromise;
     if (shouldDisplayStripePaymentForm) {
       stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY, {
-        betas: [process.env.STRIPE_BETA_FLAG],
         apiVersion: process.env.STRIPE_API_VERSION,
         locale: getLocale(),
       });
@@ -248,13 +237,17 @@ class Checkout extends React.Component {
             <button type="button" className="payment-method-button active">
               <img
                 src={AcceptedCardLogos}
-                alt={intl.formatMessage(messages['payment.page.method.type.credit'])}
+                alt={intl.formatMessage(
+                  messages["payment.page.method.type.credit"]
+                )}
               />
             </button>
 
             <PayPalButton
               onClick={this.handleSubmitPayPal}
-              className={classNames('payment-method-button', { 'skeleton-pulse': loading })}
+              className={classNames("payment-method-button", {
+                "skeleton-pulse": loading,
+              })}
               disabled={submissionDisabled}
               isProcessing={payPalIsSubmitting}
               data-testid="PayPalButton"
@@ -280,19 +273,21 @@ class Checkout extends React.Component {
               paymentDataSelector={basketSelector}
             />
           </Elements>
-        ) : (loading && (this.renderBillingFormSkeleton()))}
+        ) : (
+          loading && this.renderBillingFormSkeleton()
+        )}
 
         {shouldDisplayCyberSourcePaymentForm && (
-        <PaymentForm
-          onSubmitPayment={this.handleSubmitCybersource}
-          onSubmitButtonClick={this.handleSubmitCybersourceButtonClick}
-          disabled={submitting}
-          loading={loading}
-          loaded={loaded}
-          isProcessing={cybersourceIsSubmitting}
-          isBulkOrder={isBulkOrder}
-          isQuantityUpdating={isQuantityUpdating}
-        />
+          <PaymentForm
+            onSubmitPayment={this.handleSubmitCybersource}
+            onSubmitButtonClick={this.handleSubmitCybersourceButtonClick}
+            disabled={submitting}
+            loading={loading}
+            loaded={loaded}
+            isProcessing={cybersourceIsSubmitting}
+            isBulkOrder={isBulkOrder}
+            isQuantityUpdating={isQuantityUpdating}
+          />
         )}
       </>
     );
@@ -303,7 +298,9 @@ class Checkout extends React.Component {
 
     return (
       <section
-        aria-label={intl.formatMessage(messages['payment.section.payment.details.label'])}
+        aria-label={intl.formatMessage(
+          messages["payment.section.payment.details.label"]
+        )}
       >
         {this.renderCheckoutOptions()}
       </section>
@@ -320,7 +317,12 @@ Checkout.propTypes = {
   isFreeBasket: PropTypes.bool,
   submitting: PropTypes.bool,
   isBasketProcessing: PropTypes.bool,
-  paymentMethod: PropTypes.oneOf(['paypal', 'apple-pay', 'cybersource', 'stripe']),
+  paymentMethod: PropTypes.oneOf([
+    "paypal",
+    "apple-pay",
+    "cybersource",
+    "stripe",
+  ]),
   orderType: PropTypes.oneOf(Object.values(ORDER_TYPES)),
   enableStripePaymentProcessor: PropTypes.bool,
   clientSecretId: PropTypes.string,
@@ -343,4 +345,6 @@ const mapStateToProps = (state) => ({
   ...updateClientSecretSelector(state),
 });
 
-export default connect(mapStateToProps, { fetchClientSecret, submitPayment })(injectIntl(Checkout));
+export default connect(mapStateToProps, { fetchClientSecret, submitPayment })(
+  injectIntl(Checkout)
+);
