@@ -16,6 +16,11 @@ import StripePaymentForm from "../../payment/checkout/payment-form/StripePayment
 import CheckoutSkeleton from "./skeleton/CheckoutSkeleton";
 import { getStripeOptions } from "./StripeOptions";
 
+const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY, {
+  apiVersion: process.env.STRIPE_API_VERSION,
+  locale: "ro",
+});
+
 /**
  * SubscriptionCheckout component
  * renders Address and Stripe form
@@ -38,12 +43,6 @@ export const SubscriptionCheckout = () => {
   // state
   // Doing this within the Checkout component so locale is configured and available
   // https://stackoverflow.com/a/64694798
-  const [stripePromise] = useState(() =>
-    loadStripe(process.env.STRIPE_PUBLISHABLE_KEY, {
-      apiVersion: process.env.STRIPE_API_VERSION,
-      locale: getLocale(),
-    })
-  );
 
   const dispatch = useDispatch();
   const intl = useIntl();
