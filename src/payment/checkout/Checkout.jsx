@@ -27,7 +27,17 @@ import FreeCheckoutOrderButton from "./FreeCheckoutOrderButton";
 import { PayPalButton } from "../payment-methods/paypal";
 import { ORDER_TYPES } from "../data/constants";
 
+const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY, {
+  betas: [process.env.STRIPE_BETA_FLAG],
+  apiVersion: process.env.STRIPE_API_VERSION,
+});
+
 class Checkout extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
   componentDidMount() {
     this.props.fetchClientSecret();
   }
@@ -146,10 +156,29 @@ class Checkout extends React.Component {
       paymentMethod,
       submitting,
       orderType,
+      clientSecretId,
     } = this.props;
     const submissionDisabled = loading || isBasketProcessing;
     const isBulkOrder = orderType === ORDER_TYPES.BULK_ENROLLMENT;
     const isQuantityUpdating = isBasketProcessing && loaded;
+
+    // istanbul ignore next
+    const payPalIsSubmitting = submitting && paymentMethod === "paypal";
+    // istanbul ignore next
+    const cybersourceIsSubmitting =
+      submitting && paymentMethod === "cybersource";
+    // istanbul ignore next
+    const stripeIsSubmitting = submitting && paymentMethod === "stripe";
+
+    if (isFreeBasket) {
+      return (
+        <FreeCheckoutOrderButton onClick={this.handleSubmitFreeCheckout} />
+      );
+    }
+
+    if (loading || !clientSecretId) {
+      return this.renderBillingFormSkeleton();
+    }
 
     // Stripe element config
     // TODO: Move these to a better home
@@ -190,20 +219,6 @@ class Checkout extends React.Component {
       },
     };
 
-    // istanbul ignore next
-    const payPalIsSubmitting = submitting && paymentMethod === "paypal";
-    // istanbul ignore next
-    const cybersourceIsSubmitting =
-      submitting && paymentMethod === "cybersource";
-    // istanbul ignore next
-    const stripeIsSubmitting = submitting && paymentMethod === "stripe";
-
-    if (isFreeBasket) {
-      return (
-        <FreeCheckoutOrderButton onClick={this.handleSubmitFreeCheckout} />
-      );
-    }
-
     const basketClassName = "basket-section";
 
     // TODO: Right now when fetching capture context, CyberSource's captureKey is saved as clientSecretId
@@ -212,15 +227,6 @@ class Checkout extends React.Component {
       !loading && enableStripePaymentProcessor && options.clientSecret;
     const shouldDisplayCyberSourcePaymentForm =
       !loading && !enableStripePaymentProcessor;
-
-    // Doing this within the Checkout component so locale is configured and available
-    let stripePromise;
-    if (shouldDisplayStripePaymentForm) {
-      stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY, {
-        apiVersion: process.env.STRIPE_API_VERSION,
-        locale: getLocale(),
-      });
-    }
 
     return (
       <>
